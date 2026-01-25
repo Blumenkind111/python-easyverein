@@ -63,7 +63,6 @@ class MemberBase(EasyVereinBase):
     paymentIntervallMonths: PositiveInt | Literal[-1] = 1
     useBalanceForMembershipFee: bool | None = None
     bulletinBoardNewPostNotification: bool | None = None
-    integrationDosbGender: Literal["m", "w", "d"] | None = None
     isApplication: bool | None = Field(default=None, alias="_isApplication")
     """
     Alias for `_isApplication` field. See [Pydantic Models](../usage.md#pydantic-models) for details.
@@ -83,8 +82,10 @@ class MemberBase(EasyVereinBase):
     Alias for `_editableByRelatedMembers` field. See [Pydantic Models](../usage.md#pydantic-models) for details.
     """
     sepaMandateFile: AnyHttpURL | str | None = None
-    # TODO: exact type is not specified in API docs
-    integrationDosbSport: list | None = None
+    integrationLsbSport: list[EasyVereinReference] | None = None
+    integrationLsbGender: Literal["m", "f", "d"] | None = None
+    integrationDosbSport: list[EasyVereinReference] | None = None
+    integrationDosbGender: Literal["m", "w", "d"] | None = None
     customFields: list[EasyVereinReference] | list[MemberCustomField] | None = None
     memberGroups: list[EasyVereinReference] | list[MemberMemberGroup] | None = None
 
