@@ -16,7 +16,7 @@ from ..core.types import (
     FilterIntList,
     FilterStrList,
 )
-from .base import EasyVereinBase
+from .base import EasyVereinBase, LsbDosbSport
 from .mixins.empty_strings_mixin import EmptyStringsToNone
 from .mixins.required_attributes import required_mixin
 
@@ -82,10 +82,10 @@ class MemberBase(EasyVereinBase):
     Alias for `_editableByRelatedMembers` field. See [Pydantic Models](../usage.md#pydantic-models) for details.
     """
     sepaMandateFile: AnyHttpURL | str | None = None
-    integrationLsbSport: list[EasyVereinReference] | None = None
+    integrationLsbSport: list[EasyVereinReference] | list[LsbDosbSport] | None = None
     integrationLsbGender: Literal["m", "f", "d"] | None = None
     integrationDosbSport: list[EasyVereinReference] | None = None
-    integrationDosbGender: Literal["m", "w", "d"] | None = None
+    integrationDosbGender: Literal["m", "w", "d"] | list[LsbDosbSport] | None = None
     customFields: list[EasyVereinReference] | list[MemberCustomField] | None = None
     memberGroups: list[EasyVereinReference] | list[MemberMemberGroup] | None = None
 
