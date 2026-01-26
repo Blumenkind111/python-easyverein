@@ -19,6 +19,6 @@ class EasyVereinBase(BaseModel):
 
 
 class LsbDosbSport(EasyVereinBase, EmptyStringsToNone):
-    title: str | None = None
+    title: str
     sportNumber: str | None = None
     federationNumber: str | None = None
