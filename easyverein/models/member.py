@@ -190,6 +190,27 @@ class MemberFilter(BaseModel):
     search: str | None = None
 
 
+class MemberSetLsb(BaseModel):
+    """
+    Pydantic model used to set LSB sports for a member
+
+    Does not match the documentation, but works (with v2.0 in january 2026 at least)
+    """
+
+    lsbSport: list[str]
+
+
+class MemberSetDosb(BaseModel):
+    """
+    Pydantic model used to set LSB sports for a member
+
+    Does not match the documentation, but works (with v2.0 in january 2026 at least)
+    And for some reason, has another format than the set-lsb endpoint
+    """
+
+    dosb_sport: list[str]
+
+
 from .contact_details import ContactDetails  # noqa: E402
 from .member_custom_field import MemberCustomField  # noqa: E402
 from .member_member_group import MemberMemberGroup  # noqa: E402
