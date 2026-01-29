@@ -10,12 +10,16 @@ from easyverein.modules.member_member_group import MemberMemberGroupMixin
 from ..core.client import EasyvereinClient
 from ..models import Member, MemberCreate, MemberFilter, MemberSetLsb, MemberUpdate
 from ..models.member import MemberSetDosb
-from .mixins.crud import CRUDMixin
+from .mixins.crud import BulkUpdateCreateMixin, CRUDMixin
 from .mixins.helper import get_id
 from .mixins.recycle_bin import RecycleBinMixin
 
 
-class MemberMixin(CRUDMixin[Member, MemberCreate, MemberUpdate, MemberFilter], RecycleBinMixin[Member]):
+class MemberMixin(
+    CRUDMixin[Member, MemberCreate, MemberUpdate, MemberFilter],
+    BulkUpdateCreateMixin[Member, MemberCreate, MemberUpdate],
+    RecycleBinMixin[Member],
+):
     def __init__(self, client: EasyvereinClient, logger: logging.Logger):
         self.endpoint_name = "member"
         self.c = client

@@ -259,4 +259,4 @@ class BulkUpdateCreateMixin(Generic[ModelType, CreateModelType, UpdateModelType]
 
         url = self.c.get_url(f"/{self.endpoint_name}/bulk-update")
         response = self.c.bulk_update(url, data, exclude_none=exclude_none)
-        return [r["success"] for r in response.result]  # type: ignore
+        return [r["data"]["success"] for r in response.result]  # type: ignore
