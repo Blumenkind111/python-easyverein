@@ -81,10 +81,10 @@ class TestMemberSetLsb:
     def test_set_lsb(self, ev_connection: EasyvereinAPI, example_member: Member):
         assert example_member.id
 
-        # Set a LSB sport (assume ID "1" exists for testing)
+        # Set a LSB sport
         ev_connection.member.set_lsb(example_member.id, MemberSetLsb(lsbSport=["1"]))
 
-        # Verify it's set
+        # Verify
         member = ev_connection.member.get_by_id(example_member.id, query="{id,integrationLsbSport{id}}")
         assert member.integrationLsbSport is not None
         assert len(member.integrationLsbSport) > 0
@@ -92,7 +92,7 @@ class TestMemberSetLsb:
         # Unset it again
         ev_connection.member.set_lsb(example_member.id, MemberSetLsb(lsbSport=[]))
 
-        # Verify it's unset
+        # Verify
         member = ev_connection.member.get_by_id(example_member.id, query="{id,integrationLsbSport{id}}")
         assert member.integrationLsbSport == []
 
@@ -101,17 +101,17 @@ class TestMemberSetDosb:
     def test_set_dosb(self, ev_connection: EasyvereinAPI, example_member: Member):
         assert example_member.id
 
-        # Set a DOSB sport (assume ID "1" exists for testing)
+        # Set a DOSB sport
         ev_connection.member.set_dosb(example_member.id, MemberSetDosb(dosb_sport=["1"]))
 
-        # Verify it's set
+        # Verify
         member = ev_connection.member.get_by_id(example_member.id, query="{id,integrationDosbSport{id}}")
         assert member.integrationDosbSport is not None
         assert len(member.integrationDosbSport) > 0
 
-        # Unset it again
+        # Unset
         ev_connection.member.set_dosb(example_member.id, MemberSetDosb(dosb_sport=[]))
 
-        # Verify it's unset
+        # Verify
         member = ev_connection.member.get_by_id(example_member.id, query="{id,integrationDosbSport{id}}")
         assert member.integrationDosbSport == []
