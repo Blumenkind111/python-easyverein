@@ -84,8 +84,8 @@ class MemberBase(EasyVereinBase):
     sepaMandateFile: AnyHttpURL | str | None = None
     integrationLsbSport: list[EasyVereinReference] | list[LsbDosbSport] | None = None
     integrationLsbGender: Literal["m", "w", "d"] | None = None
-    integrationDosbSport: list[EasyVereinReference] | None = None
-    integrationDosbGender: Literal["m", "w", "d"] | list[LsbDosbSport] | None = None
+    integrationDosbSport: list[EasyVereinReference] | list[LsbDosbSport] | None = None
+    integrationDosbGender: Literal["m", "w", "d"] | None = None
     customFields: list[EasyVereinReference] | list[MemberCustomField] | None = None
     memberGroups: list[EasyVereinReference] | list[MemberMemberGroup] | None = None
 
@@ -202,7 +202,7 @@ class MemberSetLsb(BaseModel):
 
 class MemberSetDosb(BaseModel):
     """
-    Pydantic model used to set LSB sports for a member
+    Pydantic model used to set DOSB sports for a member
 
     Does not match the documentation, but works (with v2.0 in january 2026 at least)
     And for some reason, has another format than the set-lsb endpoint
