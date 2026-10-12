@@ -20,13 +20,7 @@ from .mixins.empty_strings_mixin import EmptyStringsToNone
 from .mixins.required_attributes import required_mixin
 
 InvoiceKind = Literal[
-    "balance",
-    "donation",
-    "membership",
-    "revenue",
-    "expense",
-    "cancel",
-    "credit",
+    "balance", "donation", "membership", "revenue", "expense", "cancel", "credit", "selfIssuedReceipt"
 ]
 
 

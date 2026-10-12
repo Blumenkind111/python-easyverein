@@ -247,6 +247,7 @@ class TestInvoices:
             totalPrice=21.10,
             date=datetime.date.today(),
             dateItHappend=datetime.date.today() - datetime.timedelta(days=30),
+            kind="selfIssuedReceipt",
             isDraft=False,
             gross=True,
             description="Test Attachment Upload",
