@@ -5,6 +5,7 @@ import pytest
 from easyverein import EasyvereinAPI
 from easyverein.core.exceptions import EasyvereinAPINotFoundException
 from easyverein.models.contact_details import ContactDetails, ContactDetailsCreate
+from easyverein.models.lsb_dosb_sport import LsbDosbSport
 from easyverein.models.member import Member, MemberCreate, MemberFilter, MemberSetDosb, MemberSetLsb, MemberUpdate
 
 
@@ -99,9 +100,15 @@ class TestMemberSetLsb:
         ev_connection.member.set_lsb(example_member.id, MemberSetLsb(lsbSport=["1"]))
 
         # Verify
-        member = ev_connection.member.get_by_id(example_member.id, query="{id,integrationLsbSport{id}}")
+        member = ev_connection.member.get_by_id(
+            example_member.id, query="{id,integrationLsbSport{id,created_at,updated_at}}"
+        )
         assert member.integrationLsbSport is not None
         assert len(member.integrationLsbSport) > 0
+        sport = member.integrationLsbSport[0]
+        assert isinstance(sport, LsbDosbSport)
+        assert sport.created_at is not None
+        assert sport.updated_at is not None
 
         # Unset it again
         ev_connection.member.set_lsb(example_member.id, MemberSetLsb(lsbSport=[]))
@@ -134,34 +141,81 @@ class TestMemberSetDosb:
 class TestMemberBulk:
     def test_bulk_create(self, ev_connection: EasyvereinAPI, example_member: Member, random_string: str):
         name = random_string
-        ev_connection.contact_details.bulk_create(
-            [
-                ContactDetailsCreate(firstName=f"test_{name}1", familyName="Member", isCompany=False),
-                ContactDetailsCreate(firstName=f"test_{name}2", familyName="Member", isCompany=False),
+        created_members = []
+        cds = []
+        try:
+            ev_connection.contact_details.bulk_create(
+                [
+                    ContactDetailsCreate(firstName=f"test_{name}1", familyName="Member", isCompany=False),
+                    ContactDetailsCreate(firstName=f"test_{name}2", familyName="Member", isCompany=False),
+                ]
+            )
+            cds = [
+                c
+                for c in ev_connection.contact_details.get_all(query="{id,firstName}")
+                if c.firstName and c.firstName.startswith(f"test_{name}")
             ]
-        )
-        cds = [
-            c
-            for c in ev_connection.contact_details.get_all(query="{id,firstName}")
-            if c.firstName and c.firstName.startswith(f"test_{name}")
-        ]
 
-        member_data = [
-            MemberCreate(emailOrUserName=f"test_{name}1@example.com", contactDetails=cds[0].id),
-            MemberCreate(emailOrUserName=f"test_{name}2@example.com", contactDetails=cds[1].id),
-        ]
+            member_data = [
+                MemberCreate(
+                    emailOrUserName=f"test_{name}1@example.com",
+                    contactDetails=cds[0].id,
+                    blockReason="Test block",
+                    isMatrixSearchable=True,
+                    matrixCommunicationPermission=2,
+                    requirePasswordChange=True,
+                    showWarningsAndNotesToAdminsInProfile=True,
+                    useMatrixGroupSettings=True,
+                ),
+                MemberCreate(emailOrUserName=f"test_{name}2@example.com", contactDetails=cds[1].id),
+            ]
 
-        successes = ev_connection.member.bulk_create(member_data)
-        assert successes == [True, True]
+            successes = ev_connection.member.bulk_create(member_data)
+            assert successes == [True, True]
 
-        created_members = [
-            m
-            for m in ev_connection.member.get_all(query="{id,contactDetails{firstName}}")
-            if m.contactDetails.firstName and m.contactDetails.firstName.startswith(f"test_{name}")  # type: ignore
-        ]
+            created_members = [
+                m
+                for m in ev_connection.member.get_all(query="{id,contactDetails{firstName}}")
+                if m.contactDetails.firstName and m.contactDetails.firstName.startswith(f"test_{name}")  # type: ignore
+            ]
 
-        assert isinstance(created_members, list)
-        assert len(created_members) == 2
+            assert len(created_members) == 2
+            first = next(m for m in created_members if m.contactDetails.firstName.endswith("1"))  # type: ignore
+            fetched = ev_connection.member.get_by_id(first.id)  # type: ignore
+            assert fetched.blockReason == "Test block"
+            assert fetched.isMatrixSearchable is True
+            assert fetched.matrixCommunicationPermission == 2
+            assert fetched.requirePasswordChange is True
+            assert fetched.showWarningsAndNotesToAdminsInProfile is True
+            assert fetched.useMatrixGroupSettings is True
+            assert "applicationForm" in fetched.model_fields_set
+            assert "cancelReason" in fetched.model_fields_set
+            assert "wantsToCancelAt" in fetched.model_fields_set
+            assert "isBlocked" in fetched.model_fields_set
+            assert "relatedMember" in fetched.model_fields_set
+            if ev_connection.c.api_version == "v2.0":
+                assert "applicationKind" in fetched.model_fields_set
+            else:
+                assert "applicationKind" not in fetched.model_fields_set
+            assert fetched.created_at is not None
+            assert fetched.updated_at is not None
+
+            ev_connection.member.update(
+                first.id,  # type: ignore
+                MemberUpdate(isMatrixSearchable=False, matrixCommunicationPermission=1),
+            )
+            updated = ev_connection.member.get_by_id(first.id)  # type: ignore
+            assert updated.isMatrixSearchable is False
+            assert updated.matrixCommunicationPermission == 1
+            ev_connection.member.update(first.id, MemberUpdate(blockedFromMatrix=True, matrixBlockReason="Test block"))  # type: ignore
+            blocked = ev_connection.member.get_by_id(first.id)  # type: ignore
+            assert blocked.blockedFromMatrix is True
+            assert blocked.matrixBlockReason == "Test block"
+        finally:
+            for member in created_members:
+                ev_connection.member.delete(member, delete_from_recycle_bin=True)
+            for contact in cds:
+                ev_connection.contact_details.delete(contact, delete_from_recycle_bin=True)
 
     def test_bulk_update(self, ev_connection: EasyvereinAPI):
         # Fetch two members already having a joinDate

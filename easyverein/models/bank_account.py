@@ -4,13 +4,16 @@ from __future__ import annotations
 
 from pydantic import Field
 
-from ..core.types import Date, DateTime, EasyVereinReference, FilterIntList, HexColor, Sphere
-from .base import EasyVereinBase, EasyVereinFilter
+from easyverein.models.mixins.base import EasyVereinBase, EasyVereinFilter
+
+from ..core.types import Date, EasyVereinReference, FilterIntList, HexColor, Sphere
 from .mixins.empty_strings_mixin import EmptyStringsToNone
 from .mixins.required_attributes import required_mixin
+from .mixins.timestamps import TimestampsMixin
+from .mixins.wastebasket import WastebasketMixin
 
 
-class BankAccountBase(EasyVereinBase):
+class BankAccountBase(EasyVereinBase, WastebasketMixin):
     """
     | Representative Model Class | Update Model Class | Create Model Class |
     | --- | --- | --- |
@@ -29,15 +32,13 @@ class BankAccountBase(EasyVereinBase):
     sphere: Sphere | None = None
     computeStartsaldoOnImport: bool | None = None
     last_imported_date: Date | None = None
-    creditor_address: EasyVereinReference | None = None
+    creditor_address: EasyVereinReference | ContactDetails | None = None
 
 
-class BankAccount(BankAccountBase, EmptyStringsToNone):
+class BankAccount(BankAccountBase, EmptyStringsToNone, TimestampsMixin):
     """Bank account returned by the API."""
 
-    billingAccount: EasyVereinReference | None = None
-    created_at: DateTime | None = None
-    updated_at: DateTime | None = None
+    billingAccount: EasyVereinReference | BillingAccount | None = None
 
 
 class BankAccountCreate(BankAccountBase, required_mixin(["name", "short"])):  # type: ignore
@@ -58,3 +59,7 @@ class BankAccountFilter(EasyVereinFilter):
     deleted: bool | None = None
     ordering: str | None = None
     search: str | None = None
+
+
+from .billing_account import BillingAccount  # noqa: E402
+from .contact_details import ContactDetails  # noqa: E402

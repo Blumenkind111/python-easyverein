@@ -4,13 +4,16 @@ from typing import Literal
 
 from pydantic import Field
 
-from ..core.types import EasyVereinReference, FilterIntList, HexColor, PositiveIntWithZero
-from .base import EasyVereinBase, EasyVereinFilter
+from easyverein.models.mixins.base import EasyVereinBase, EasyVereinFilter
+
+from ..core.types import DateTime, EasyVereinReference, FilterIntList, HexColor, PositiveIntWithZero
 from .mixins.empty_strings_mixin import EmptyStringsToNone
 from .mixins.required_attributes import required_mixin
+from .mixins.timestamps import TimestampsMixin
+from .mixins.wastebasket import WastebasketMixin
 
 
-class CustomFieldBase(EasyVereinBase):
+class CustomFieldBase(EasyVereinBase, WastebasketMixin):
     """
     | Representative Model Class | Update Model Class | Create Model Class |
     | --- | --- | --- |
@@ -68,12 +71,14 @@ class CustomFieldBase(EasyVereinBase):
     collection: EasyVereinReference | None = None
 
 
-class CustomField(CustomFieldBase, EmptyStringsToNone):
+class CustomField(CustomFieldBase, EmptyStringsToNone, TimestampsMixin):
     """
     Pydantic model used to represent a custom field
     """
 
-    pass
+    additional: str | None = None
+    placeHolder: str | None = None
+    selectOptionsLastChanged: DateTime | None = Field(default=None, alias="_selectOptionsLastChanged")
 
 
 class CustomFieldCreate(CustomFieldBase, required_mixin(["name", "settings_type", "kind"])):  # type: ignore

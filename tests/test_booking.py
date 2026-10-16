@@ -1,4 +1,4 @@
-import datetime
+from datetime import UTC, datetime
 from typing import Generator
 
 import pytest
@@ -22,13 +22,20 @@ class TestBooking:
     def test_create_booking_minimal(self, ev_connection: EasyvereinAPI, random_string: str):
         booking_model = BookingCreate(
             receiver=f"test_{random_string}",
-            date=datetime.date.today(),
+            date=datetime.now(tz=UTC),
             amount=100.0,
         )
 
         booking = ev_connection.booking.create(booking_model)
         assert isinstance(booking, Booking)
         assert booking.receiver == booking_model.receiver
+        assert isinstance(booking.id, int)
+        assert isinstance(booking_model.date, datetime)
+
+        fetched = ev_connection.booking.get_by_id(booking.id)
+        assert "importDate" in fetched.model_fields_set
+        assert fetched.created_at is not None
+        assert fetched.updated_at is not None
 
         ev_connection.booking.delete(booking, delete_from_recycle_bin=True)
 
@@ -39,12 +46,12 @@ class TestBookingBulk:
         booking_data = [
             BookingCreate(
                 receiver=f"test_{name}1",
-                date=datetime.date.today(),
+                date=datetime.now(tz=UTC),
                 amount=100.0,
             ),
             BookingCreate(
                 receiver=f"test_{name}2",
-                date=datetime.date.today(),
+                date=datetime.now(tz=UTC),
                 amount=200.0,
             ),
         ]
@@ -66,14 +73,14 @@ class TestBookingBulk:
         b1 = ev_connection.booking.create(
             BookingCreate(
                 receiver=f"test_{name}3",
-                date=datetime.date.today(),
+                date=datetime.now(tz=UTC).date(),
                 amount=300.0,
             )
         )
         b2 = ev_connection.booking.create(
             BookingCreate(
                 receiver=f"test_{name}4",
-                date=datetime.date.today(),
+                date=datetime.now(tz=UTC).date(),
                 amount=400.0,
             )
         )

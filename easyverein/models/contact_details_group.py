@@ -6,16 +6,20 @@ from __future__ import annotations
 
 from pydantic import Field
 
+from easyverein.models.mixins.base import EasyVereinBase, EasyVereinFilter
+
 from ..core.types import (
     FilterIntList,
     HexColor,
+    PositiveIntWithZero,
 )
-from .base import EasyVereinBase, EasyVereinFilter
 from .mixins.empty_strings_mixin import EmptyStringsToNone
 from .mixins.required_attributes import required_mixin
+from .mixins.timestamps import TimestampsMixin
+from .mixins.wastebasket import WastebasketMixin
 
 
-class ContactDetailsGroupBase(EasyVereinBase):
+class ContactDetailsGroupBase(EasyVereinBase, WastebasketMixin):
     """
     | Representative Model Class | Update Model Class | Create Model Class |
     | --- | --- | --- |
@@ -32,9 +36,10 @@ class ContactDetailsGroupBase(EasyVereinBase):
     name: str | None = Field(default=None, max_length=200)
     color: HexColor = None
     short: str | None = Field(default=None, max_length=4)
+    orderSequence: PositiveIntWithZero | None = None
 
 
-class ContactDetailsGroup(ContactDetailsGroupBase, EmptyStringsToNone):
+class ContactDetailsGroup(ContactDetailsGroupBase, EmptyStringsToNone, TimestampsMixin):
     pass
 
 

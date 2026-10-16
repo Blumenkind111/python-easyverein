@@ -2,13 +2,15 @@ from __future__ import annotations
 
 from pydantic import PositiveInt
 
+from easyverein.models.mixins.base import EasyVereinBase, EasyVereinFilter
+
 from ..core.types import EasyVereinReference, FilterIntList, FilterStrList, PositiveIntWithZero, Sphere
-from .base import EasyVereinBase, EasyVereinFilter
 from .mixins.empty_strings_mixin import EmptyStringsToNone
 from .mixins.required_attributes import required_mixin
+from .mixins.wastebasket import WastebasketMixin
 
 
-class BillingAccountBase(EasyVereinBase):
+class BillingAccountBase(EasyVereinBase, WastebasketMixin):
     """
     | Representative Model Class | Update Model Class | Create Model Class |
     | --- | --- | --- |
@@ -30,6 +32,7 @@ class BillingAccount(BillingAccountBase, EmptyStringsToNone):
     accountingPlans: list[EasyVereinReference] | None = None
     numberLength: PositiveIntWithZero | None = None
     linkedBookings: PositiveIntWithZero | None = None
+    category: str | None = None
 
 
 class BillingAccountCreate(

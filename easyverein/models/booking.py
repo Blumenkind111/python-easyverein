@@ -4,13 +4,16 @@ Invoice Item model
 
 from __future__ import annotations
 
+from easyverein.models.mixins.base import EasyVereinBase, EasyVereinFilter
+
 from ..core.types import DateTime, EasyVereinReference, FilterIntList, Sphere
-from .base import EasyVereinBase, EasyVereinFilter
 from .mixins.empty_strings_mixin import EmptyStringsToNone
 from .mixins.required_attributes import required_mixin
+from .mixins.timestamps import TimestampsMixin
+from .mixins.wastebasket import WastebasketMixin
 
 
-class BookingBase(EasyVereinBase):
+class BookingBase(EasyVereinBase, WastebasketMixin):
     """
     | Representative Model Class | Update Model Class | Create Model Class |
     | --- | --- | --- |
@@ -19,7 +22,7 @@ class BookingBase(EasyVereinBase):
 
     amount: float | None = None
     bankAccount: EasyVereinReference | BankAccount | None = None
-    billingAccount: BillingAccount | EasyVereinReference | None = None
+    billingAccount: EasyVereinReference | BillingAccount | None = None
     description: str | None = None
     date: DateTime | None = None
     receiver: str | None = None
@@ -34,12 +37,12 @@ class BookingBase(EasyVereinBase):
     relatedInvoice: list[EasyVereinReference] | list[Invoice] | None = None
 
 
-class Booking(BookingBase, EmptyStringsToNone):
+class Booking(BookingBase, EmptyStringsToNone, TimestampsMixin):
     """
     Pydantic model representing an Booking
     """
 
-    pass
+    importDate: DateTime | None = None
 
 
 class BookingCreate(

@@ -8,13 +8,16 @@ from typing import Any, Literal
 
 from pydantic import EmailStr, Field
 
+from easyverein.models.mixins.base import EasyVereinBase, EasyVereinFilter
+
 from ..core.types import Date, EasyVereinReference, FilterIntList
-from .base import EasyVereinBase, EasyVereinFilter
 from .mixins.empty_strings_mixin import EmptyStringsToNone
 from .mixins.required_attributes import required_mixin
+from .mixins.timestamps import TimestampsMixin
+from .mixins.wastebasket import WastebasketMixin
 
 
-class ContactDetailsBase(EasyVereinBase):
+class ContactDetailsBase(EasyVereinBase, WastebasketMixin):
     """
     | Representative Model Class | Update Model Class | Create Model Class |
     | --- | --- | --- |
@@ -68,6 +71,18 @@ class ContactDetailsBase(EasyVereinBase):
     companyState: str | None = Field(default=None, max_length=100)
     companyZip: str | None = Field(default=None, max_length=20)
     companyCountry: str | None = Field(default=None, max_length=50)
+    companyAddressSuffix: str | None = None
+    companyAddressSuffixInvoice: str | None = None
+    companyCityInvoice: str | None = None
+    companyCountryInvoice: str | None = None
+    companyNameInvoice: str | None = None
+    companyPhoneInvoice: str | None = None
+    companyStateInvoice: str | None = None
+    companyStreetInvoice: str | None = None
+    companyZipInvoice: str | None = None
+    country_code: str | None = Field(default=None, max_length=5)
+    company_country_code: str | None = Field(default=None, max_length=5)
+    company_country_code_invoice: str | None = Field(default=None, max_length=5)
     professionalRole: str | None = Field(default=None, max_length=500)
     balance: float | None = None
     iban: str | None = Field(default=None, max_length=50)
@@ -88,6 +103,8 @@ class ContactDetailsBase(EasyVereinBase):
     - 4: other
     """
     datevAccountNumber: int | None = None
+    datev_creditor_number: int | None = None
+    customPaymentMethod: EasyVereinReference | None = None
     # TODO: Refine once available from API description
     copiedFromParent: Any | None = Field(default=None, alias="_copiedFromParent")
     """
@@ -119,12 +136,23 @@ class ContactDetailsBase(EasyVereinBase):
     """
 
 
-class ContactDetails(ContactDetailsBase, EmptyStringsToNone):
+class ContactDetails(ContactDetailsBase, EmptyStringsToNone, TimestampsMixin):
     """
     Pydantic model for contact details
     """
 
+    __v3_names__ = {"geoPositionCoords": "geo_position_coordinates"}
+
     member: EasyVereinReference | Member | None = None
+    addressStringInvoice: str | None = None
+    age: int | None = None
+    changeRequests: list[EasyVereinReference] | None = None
+    copiedInstances: list[EasyVereinReference] | list[ContactDetails] | None = None
+    customFields: list[EasyVereinReference] | None = None
+    formerMemberData: EasyVereinReference | None = None
+    geoPositionCoords: dict[str, float | str] | None = None
+    methodOfPaymentName: str | None = None
+    name: str | None = None
 
 
 class ContactDetailsUpdate(ContactDetailsBase):

@@ -28,6 +28,9 @@ class TestBookingProject:
         assert isinstance(booking_project, BookingProject)
         assert booking_project.name == f"test_{random_string}"
         assert isinstance(booking_project.id, int)
+        fetched = ev_connection.booking_project.get_by_id(booking_project.id)
+        assert fetched.created_at is not None
+        assert fetched.updated_at is not None
 
         ev_connection.booking_project.delete(booking_project)
 

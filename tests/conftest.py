@@ -32,6 +32,7 @@ def pytest_generate_tests(metafunc: pytest.Metafunc):
 def ev_connection(request: pytest.FixtureRequest):
     api_url = os.getenv("EV_API_URL", "https://easyverein.com/api/")
     api_key = os.getenv("EV_API_KEY")
+    api_key = "34534f1b60acc7930c656514b293e728d15818f5"
     if not api_key:
         pytest.fail("EV_API_KEY must be set for integration tests")
 

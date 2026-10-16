@@ -44,13 +44,14 @@ class TestContactDetailsGroup:
         short = random_string[-4:]
 
         contact_details_group = ev_connection.contact_details_group.create(
-            ContactDetailsGroupCreate(name=name, color="#FF0000", short=short)
+            ContactDetailsGroupCreate(name=name, color="#FF0000", short=short, orderSequence=3)
         )
         assert isinstance(contact_details_group, ContactDetailsGroup)
         assert isinstance(contact_details_group.id, int)
         assert contact_details_group.name == name
         assert contact_details_group.color == "#FF0000"
         assert contact_details_group.short == short
+        assert contact_details_group.orderSequence == 3
 
         filtered_groups, total_count = ev_connection.contact_details_group.get(
             search=ContactDetailsGroupFilter(name=name)
@@ -71,6 +72,9 @@ class TestContactDetailsGroup:
         assert fetched_group.id == contact_details_group.id
         assert fetched_group.color == "#00FF00"
         assert fetched_group.short == "TCDG"
+        assert fetched_group.orderSequence == 3
+        assert fetched_group.created_at is not None
+        assert fetched_group.updated_at is not None
 
         ev_connection.contact_details_group.delete(contact_details_group)
 

@@ -8,6 +8,8 @@ from typing import Literal
 
 from pydantic import Field, PositiveInt
 
+from easyverein.models.mixins.base import EasyVereinBase, EasyVereinFilter
+
 from ..core.types import (
     EasyVereinReference,
     FilterIntList,
@@ -15,12 +17,13 @@ from ..core.types import (
     PositiveIntWithZero,
     Sphere,
 )
-from .base import EasyVereinBase, EasyVereinFilter
 from .mixins.empty_strings_mixin import EmptyStringsToNone
 from .mixins.required_attributes import required_mixin
+from .mixins.timestamps import TimestampsMixin
+from .mixins.wastebasket import WastebasketMixin
 
 
-class MemberGroupBase(EasyVereinBase):
+class MemberGroupBase(EasyVereinBase, WastebasketMixin):
     """
     | Representative Model Class | Update Model Class | Create Model Class |
     | --- | --- | --- |
@@ -47,9 +50,9 @@ class MemberGroupBase(EasyVereinBase):
     descriptionOnInvoice: str | None = None
     showInApplicationform: bool | None = None
     agePermission: PositiveIntWithZero | None = None
-    nextGroup: EasyVereinReference | None = None
+    nextGroup: EasyVereinReference | MemberGroupBase | None = None
     taxRate: float | None = None
-    billingAccount: BillingAccount | EasyVereinReference | None = None
+    billingAccount: EasyVereinReference | BillingAccount | None = None
     costCentre: str | None = Field(default=None, max_length=8)
     isOnlyVisibleToAdmins: bool | None = None
     user_shares: Literal["n", "a", "d"] | None = None
@@ -113,12 +116,8 @@ class MemberGroupBase(EasyVereinBase):
     - a: allowed
     - d: forbidden
     """
-    user_importcalendar: Literal["n", "a", "d"] | None = None
-    """
-    - n: standard
-    - a: allowed
-    - d: forbidden
-    """
+    user_allowICSExport: Literal["n", "a", "d"] | None = None
+    user_bankData: Literal["n", "a", "d"] | None = None
     user_invoiceRequest: Literal["n", "a", "d"] | None = None
     """
     - n: standard
@@ -132,10 +131,19 @@ class MemberGroupBase(EasyVereinBase):
     - d: forbidden
     """
     sphere: Sphere | None = None
+    auto_group_start_date_mode: int | None = None
+    keepMembershipAfterAgeBasedGroupChange: bool | None = None
+    isMatrixSearchable: bool | None = None
+    matrixCommunicationPermission: int | None = None
+    matrix_moderator_ids: list[int] | None = None
+    use_automated_matrix_chat: bool | None = None
+    orderSequence: PositiveIntWithZero | None = None
+    participationsPerWeek: PositiveIntWithZero | None = None
 
 
-class MemberGroup(MemberGroupBase, EmptyStringsToNone):
-    pass
+class MemberGroup(MemberGroupBase, EmptyStringsToNone, TimestampsMixin):
+    active_linked_items: PositiveIntWithZero | None = None
+    linkedItems: PositiveIntWithZero | None = None
 
 
 class MemberGroupCreate(MemberGroupBase, required_mixin(["name", "color", "short"])):  # type: ignore

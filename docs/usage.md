@@ -58,9 +58,11 @@ else, for example using an async worker. It does not extend the runtime of the i
 ```python
 from easyverein import BearerToken, EasyvereinAPI
 
+
 def handle_token_refresh() -> None:
     # This merely serves as a trigger for you to refresh and store the token
     return None
+
 
 c = EasyvereinAPI(api_key="your_key", api_version="v2.0", token_refresh_callback=handle_token_refresh)
 ```
@@ -73,15 +75,14 @@ the request by a small amount, which may or may not be acceptable for your use c
 ```python
 from easyverein import BearerToken, EasyvereinAPI
 
+
 def handle_token_refresh(new_token: BearerToken) -> None:
     print(f"New token: {new_token.Bearer}")
     return None
 
+
 c = EasyvereinAPI(
-    api_key="your_key",
-    api_version="v2.0",
-    token_refresh_callback=handle_token_refresh,
-    auto_refresh_token=True
+    api_key="your_key", api_version="v2.0", token_refresh_callback=handle_token_refresh, auto_refresh_token=True
 )
 ```
 
@@ -209,9 +210,7 @@ specs provided by the EasyVerein API and validated as Pydantic model, too.
 **Example**
 
 ```python
-search = InvoiceFilter(
-    invNumber__in=["1", "3", "5"], canceledInvoice__isnull=True, isDraft=False
-)
+search = InvoiceFilter(invNumber__in=["1", "3", "5"], canceledInvoice__isnull=True, isDraft=False)
 
 filtered_invoices, total_count = ev_connection.invoice.get(search=search)
 ```
@@ -275,9 +274,7 @@ The EasyVerein API supports a query syntax to select the fields you want to retu
 nested fields like this:
 
 ```python
-invoices = ev_client.invoice.get(
-    query="{id,date,dateItHappend,receiver,relatedAddress{id,street,zip}}"
-)
+invoices = ev_client.invoice.get(query="{id,date,dateItHappend,receiver,relatedAddress{id,street,zip}}")
 ```
 
 This query will return the following raw JSON, as will get the specified fields from the `Invoice` itself, but also
@@ -312,7 +309,9 @@ allmembers = ev_client.member.get_all(
     query="{membershipNumber,contactDetails{familyName,firstName,dateOfBirth},memberGroups{memberGroup{short}}}"
 )
 for m in allmembers:
-    print(f"{m.membershipNumber} {m.contactDetails.familyName} {m.contactDetails.firstName} {m.contactDetails.dateOfBirth}")
+    print(
+        f"{m.membershipNumber} {m.contactDetails.familyName} {m.contactDetails.firstName} {m.contactDetails.dateOfBirth}"
+    )
     if m.memberGroups is not None:
         for g in m.memberGroups:
             print(f"     Group: {g.memberGroup.short}")
@@ -332,11 +331,7 @@ from easyverein.models import CustomFieldCreate
 
 ev_client = EasyvereinAPI("<your-token>")
 
-custom_field_model = CustomFieldCreate(
-    name="Test-Field",
-    kind="e",
-    settings_type="t"
-)
+custom_field_model = CustomFieldCreate(name="Test-Field", kind="e", settings_type="t")
 response = ev_client.custom_field.create(custom_field_model)
 
 # Response now has type CustomField and contains the parsed response from the API
@@ -357,22 +352,14 @@ ev_client = EasyvereinAPI("<your-token>")
 custom_field_id = 123456
 
 # We cant to change the name
-update_model = CustomFieldUpdate(
-    name="New Name"
-)
+update_model = CustomFieldUpdate(name="New Name")
 
 # We can either update the model
 custom_field = ev_client.custom_field.get_by_id(custom_field_id)
-ev_client.custom_field.update(
-    custom_field,
-    update_model
-)
+ev_client.custom_field.update(custom_field, update_model)
 
 # Alternatively, we can use the ID only
-ev_client.custom_field.update(
-    custom_field_id,
-    update_model
-)
+ev_client.custom_field.update(custom_field_id, update_model)
 ```
 
 ## Bulk-Creating and Bulk-Updating
@@ -394,10 +381,12 @@ from easyverein.models import ContactDetailsCreate
 
 ev_client = EasyvereinAPI("<your-token>")
 
-results = ev_client.contact_details.bulk_create([
-    ContactDetailsCreate(firstName="example1", lastName="Example1", isCompany=False),
-    ContactDetailsCreate(firstName="example2", lastName="Example2", isCompany=False),
-])
+results = ev_client.contact_details.bulk_create(
+    [
+        ContactDetailsCreate(firstName="example1", lastName="Example1", isCompany=False),
+        ContactDetailsCreate(firstName="example2", lastName="Example2", isCompany=False),
+    ]
+)
 
 print(results)  # [True, True] if both were created successfully
 ```
@@ -410,10 +399,12 @@ from easyverein.models import MemberUpdate
 
 ev_client = EasyvereinAPI("<your-token>")
 
-results = ev_client.member.bulk_update([
-    MemberUpdate(id=1, membershipNumber="M1"),
-    MemberUpdate(id=2, membershipNumber="M2"),
-])
+results = ev_client.member.bulk_update(
+    [
+        MemberUpdate(id=1, membershipNumber="M1"),
+        MemberUpdate(id=2, membershipNumber="M2"),
+    ]
+)
 
 print(results)  # [True, True] if both were updated successfully
 ```

@@ -26,10 +26,18 @@ class TestCustomFieldSelectOption:
             select_options = ev_connection.custom_field.select_option(custom_field.id)
 
             # Create select option
-            option = select_options.create(CustomFieldSelectOptionCreate(value="Option A"))
+            create_options = {"maxSelections": 3} if settings_type == "a" else {}
+            option = select_options.create(CustomFieldSelectOptionCreate(value="Option A", **create_options))
             assert isinstance(option, CustomFieldSelectOption)
             assert option.value == "Option A"
             assert isinstance(option.id, int)
+            fetched_option = select_options.get_by_id(option.id)
+            if settings_type == "a":
+                assert fetched_option.maxSelections == 3
+            assert fetched_option.availableForAssignment is True
+            assert "actuallyRemoved" in fetched_option.model_fields_set
+            assert fetched_option.created_at is not None
+            assert fetched_option.updated_at is not None
 
             # Create another option
             option_b = select_options.create(CustomFieldSelectOptionCreate(value="Option B", orderSequence=1))

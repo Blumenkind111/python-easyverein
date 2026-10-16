@@ -171,6 +171,10 @@ class TestBillingAccount:
             assert retrieved_account.id == billing_account.id
             assert retrieved_account.name == "Get By ID Test"
             assert retrieved_account.number == 4444
+            if ev_connection.c.api_version == "v3.0":
+                assert "category" in retrieved_account.model_fields_set
+            else:
+                assert "category" not in retrieved_account.model_fields_set
         finally:
             # Clean up
             ev_connection.billing_account.delete(billing_account, delete_from_recycle_bin=True)

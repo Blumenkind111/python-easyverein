@@ -19,6 +19,14 @@ class TestCustomField:
         )
         assert isinstance(custom_field, CustomField)
         assert custom_field.name == "Test-Field"
+        assert isinstance(custom_field.id, int)
+        fetched = ev_connection.custom_field.get_by_id(custom_field.id)
+        assert fetched.additional is None
+        assert fetched.placeHolder is not None
+        assert fetched.placeHolder.startswith("%custom_")
+        assert "selectOptionsLastChanged" in fetched.model_fields_set
+        assert fetched.created_at is not None
+        assert fetched.updated_at is not None
 
         # Get all custom fields and check that we've got one more than the 40 built-in now
         custom_fields, total_count = ev_connection.custom_field.get()

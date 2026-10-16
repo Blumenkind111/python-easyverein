@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from easyverein.models.mixins.base import EasyVereinBase, EasyVereinFilter
+
 from ..core.types import EasyVereinReference, FilterIntList
-from .base import EasyVereinBase, EasyVereinFilter
 from .mixins.empty_strings_mixin import EmptyStringsToNone
 from .mixins.required_attributes import required_mixin
+from .mixins.timestamps import TimestampsMixin
 
 
 class MemberCustomFieldBase(EasyVereinBase):
@@ -33,12 +35,10 @@ class MemberCustomFieldBase(EasyVereinBase):
     selectedOptions: list[CustomFieldSelectOption | EasyVereinReference] | None = None
 
 
-class MemberCustomField(MemberCustomFieldBase, EmptyStringsToNone):
+class MemberCustomField(MemberCustomFieldBase, EmptyStringsToNone, TimestampsMixin):
     """
     Pydantic model representing a member custom field
     """
-
-    pass
 
 
 class MemberCustomFieldCreate(MemberCustomFieldBase, required_mixin(["customField"])):  # type: ignore
