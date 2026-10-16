@@ -1,4 +1,4 @@
-import datetime
+from datetime import UTC, datetime, timedelta
 from typing import Generator
 
 import pytest
@@ -59,6 +59,34 @@ class TestInvoices:
             assert fetched_invoice.charges.charge == pytest.approx(0)
             assert fetched_invoice.charges.chargeBack == pytest.approx(0)
             assert fetched_invoice.charges.total == pytest.approx(invoice_model.totalPrice)
+        finally:
+            ev_connection.invoice.delete(invoice, delete_from_recycle_bin=True)
+
+    def test_invoice_item_balance_field(self, ev_connection: EasyvereinAPI, random_string: str):
+        invoice = ev_connection.invoice.create(
+            InvoiceCreate(invNumber=random_string, receiver="Test Receiver", totalPrice=10, isDraft=True)
+        )
+        try:
+            assert invoice.id is not None
+            item = ev_connection.invoice_item.create(
+                InvoiceItemCreate(
+                    relatedInvoice=invoice.id,
+                    title="Test Item",
+                    quantity=1,
+                    unitPrice=10,
+                    taxRate=0,
+                    gross=True,
+                    deductedExistingBalance=True,
+                )
+            )
+            assert item.id is not None
+            fetched = ev_connection.invoice_item.get_by_id(item.id)
+            assert fetched.deductedExistingBalance is True
+            assert "articleObject" in fetched.model_fields_set
+            assert "copiedFromParent" in fetched.model_fields_set
+            assert "electronic_total_price_with_tax" in fetched.model_fields_set
+            assert fetched.created_at is not None
+            assert fetched.updated_at is not None
         finally:
             ev_connection.invoice.delete(invoice, delete_from_recycle_bin=True)
 
@@ -146,8 +174,8 @@ class TestInvoices:
         invoice_model = InvoiceCreate(
             invNumber=random_string,
             totalPrice=50.60,
-            date=datetime.date.today(),
-            dateItHappend=datetime.date.today(),
+            date=datetime.now(tz=UTC).date(),
+            dateItHappend=datetime.now(tz=UTC).date(),
             isDraft=True,
             gross=True,
             description="Test Description",
@@ -205,8 +233,8 @@ class TestInvoices:
         invoice_model = InvoiceCreate(
             invNumber=random_string,
             totalPrice=102.90,
-            date=datetime.date.today(),
-            dateItHappend=datetime.date.today(),
+            date=datetime.now(tz=UTC).date(),
+            dateItHappend=datetime.now(tz=UTC).date(),
             isDraft=False,
             gross=True,
             description="Test Description",
@@ -273,8 +301,8 @@ class TestInvoices:
         invoice_model = InvoiceCreate(
             invNumber=random_string,
             totalPrice=21.10,
-            date=datetime.date.today(),
-            dateItHappend=datetime.date.today() - datetime.timedelta(days=30),
+            date=datetime.now(tz=UTC).date(),
+            dateItHappend=datetime.now(tz=UTC).date() - timedelta(days=30),
             kind="selfIssuedReceipt",
             isDraft=False,
             gross=True,

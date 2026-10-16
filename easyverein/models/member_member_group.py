@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from easyverein.models.mixins.base import EasyVereinBase, EasyVereinFilter
+
 from ..core.types import Date, EasyVereinReference, FilterIntList
-from .base import EasyVereinBase, EasyVereinFilter
 from .mixins.empty_strings_mixin import EmptyStringsToNone
 from .mixins.required_attributes import required_mixin
+from .mixins.timestamps import TimestampsMixin
 
 
 class MemberMemberGroupBase(EasyVereinBase):
@@ -26,12 +28,10 @@ class MemberMemberGroupBase(EasyVereinBase):
     end: Date | None = None  # Field not documented
 
 
-class MemberMemberGroup(MemberMemberGroupBase, EmptyStringsToNone):
+class MemberMemberGroup(MemberMemberGroupBase, EmptyStringsToNone, TimestampsMixin):
     """
     Pydantic model representing a member custom field
     """
-
-    pass
 
 
 class MemberMemberGroupCreate(MemberMemberGroupBase, required_mixin(["memberGroup", "paymentActive"])):  # type: ignore

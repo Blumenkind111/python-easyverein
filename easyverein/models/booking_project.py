@@ -1,11 +1,13 @@
 from easyverein.core.types import FilterIntList, HexColor
-from easyverein.models.base import EasyVereinBase, EasyVereinFilter
+from easyverein.models.mixins.base import EasyVereinBase, EasyVereinFilter
 from easyverein.models.mixins.empty_strings_mixin import EmptyStringsToNone
+from easyverein.models.mixins.timestamps import TimestampsMixin
+from easyverein.models.mixins.wastebasket import WastebasketMixin
 
 from .mixins.required_attributes import required_mixin
 
 
-class BookingProjectBase(EasyVereinBase):
+class BookingProjectBase(EasyVereinBase, WastebasketMixin):
     """
     | Representative Model Class | Update Model Class | Create Model Class |
     | --- | --- | --- |
@@ -20,12 +22,10 @@ class BookingProjectBase(EasyVereinBase):
     projectCostCentre: str | None = None
 
 
-class BookingProject(BookingProjectBase, EmptyStringsToNone):
+class BookingProject(BookingProjectBase, EmptyStringsToNone, TimestampsMixin):
     """
     Pydantic model for booking project
     """
-
-    pass
 
 
 class BookingProjectUpdate(BookingProjectBase):

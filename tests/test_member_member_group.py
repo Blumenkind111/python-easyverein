@@ -22,7 +22,10 @@ class TestMemberMemberGroup:
         ev_connection.member.member_group(example_member.id).add_to_group(group)
 
         # Check that the member now is in the group
-        assert ev_connection.member.member_group(example_member.id).get_group_membership(group) is not None
+        membership = ev_connection.member.member_group(example_member.id).get_group_membership(group)
+        assert membership is not None
+        assert membership.created_at is not None
+        assert membership.updated_at is not None
 
         # Remove the member from the group
         ev_connection.member.member_group(example_member.id).remove_from_group(group)

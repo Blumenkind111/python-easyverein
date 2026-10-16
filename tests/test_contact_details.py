@@ -65,6 +65,47 @@ class TestContactDetails:
         deleted_contact_details, _ = ev_connection.contact_details.get_deleted()
         assert len(deleted_contact_details) == 0
 
+    def test_create_company_invoice_fields(self, ev_connection: EasyvereinAPI, random_string: str):
+        values = {
+            "companyAddressSuffix": "Suite 12",
+            "companyAddressSuffixInvoice": "Suite 34",
+            "companyCityInvoice": "Berlin",
+            "companyCountryInvoice": "Germany",
+            "companyNameInvoice": "Test Invoice Company",
+            "companyPhoneInvoice": "+4912345678",
+            "companyStateInvoice": "Berlin",
+            "companyStreetInvoice": "Test Street 1",
+            "companyZipInvoice": "12345",
+            "country_code": "DE",
+            "company_country_code": "DE",
+            "company_country_code_invoice": "DE",
+            "datev_creditor_number": 12345,
+        }
+        contact = ev_connection.contact_details.create(
+            ContactDetailsCreate(isCompany=True, companyName=random_string, **values)
+        )
+        try:
+            assert contact.id is not None
+            fetched = ev_connection.contact_details.get_by_id(contact.id)
+            assert {name: getattr(fetched, name) for name in values} == values
+            for name in (
+                "addressStringInvoice",
+                "age",
+                "changeRequests",
+                "copiedInstances",
+                "customFields",
+                "formerMemberData",
+                "geoPositionCoords",
+                "methodOfPaymentName",
+                "name",
+                "customPaymentMethod",
+            ):
+                assert name in fetched.model_fields_set
+            assert fetched.created_at is not None
+            assert fetched.updated_at is not None
+        finally:
+            ev_connection.contact_details.delete(contact, delete_from_recycle_bin=True)
+
     def test_create_minimal_personal_contact_details(self, ev_connection: EasyvereinAPI):
         contact_details = ev_connection.contact_details.create(
             ContactDetailsCreate(isCompany=False, firstName="Test", familyName="Person")

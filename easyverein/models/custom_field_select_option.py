@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from easyverein.models.mixins.base import EasyVereinBase, EasyVereinFilter
+
 from ..core.types import EasyVereinReference, FilterIntList, FilterStrList, PositiveIntWithZero
-from .base import EasyVereinBase, EasyVereinFilter
 from .mixins.empty_strings_mixin import EmptyStringsToNone
 from .mixins.required_attributes import required_mixin
+from .mixins.timestamps import TimestampsMixin
 
 
 class CustomFieldSelectOptionBase(EasyVereinBase):
@@ -16,9 +18,9 @@ class CustomFieldSelectOptionBase(EasyVereinBase):
     Those are only available for select (s) and multiselect (a) custom fields.
     """
 
-    value: str
+    value: str | None = None
     orderSequence: PositiveIntWithZero | None = None
-    availableForAssignment: bool | None = None
+    maxSelections: PositiveIntWithZero | None = None
     customField: EasyVereinReference | None = None
     """
     Custom field this option belongs to. Set automatically when creating options via
@@ -26,12 +28,13 @@ class CustomFieldSelectOptionBase(EasyVereinBase):
     """
 
 
-class CustomFieldSelectOption(CustomFieldSelectOptionBase, EmptyStringsToNone):
+class CustomFieldSelectOption(CustomFieldSelectOptionBase, EmptyStringsToNone, TimestampsMixin):
     """
     Pydantic model used to represent a custom field select option
     """
 
-    pass
+    actuallyRemoved: bool | None = None
+    availableForAssignment: bool | None = None
 
 
 class CustomFieldSelectOptionCreate(CustomFieldSelectOptionBase, required_mixin(["value"])):  # type: ignore

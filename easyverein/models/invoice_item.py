@@ -4,14 +4,16 @@ Invoice Item model
 
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Any
 
 from pydantic import Field
 
+from easyverein.models.mixins.base import EasyVereinBase, EasyVereinFilter
+
 from ..core.types import EasyVereinReference, FilterIntList, Sphere
-from .base import EasyVereinBase, EasyVereinFilter
 from .mixins.empty_strings_mixin import EmptyStringsToNone
 from .mixins.required_attributes import required_mixin
+from .mixins.timestamps import TimestampsMixin
 
 
 class InvoiceItemBase(EasyVereinBase):
@@ -27,7 +29,7 @@ class InvoiceItemBase(EasyVereinBase):
         (setting `isDraft` to `False`) will fail on EV API side.
     """
 
-    relatedInvoice: Invoice | EasyVereinReference | None = None
+    relatedInvoice: EasyVereinReference | Invoice | None = None
     quantity: float | None = None
     unitPrice: float | None = None
     totalPrice: float | None = None
@@ -37,16 +39,22 @@ class InvoiceItemBase(EasyVereinBase):
     gross: bool | None = None
     taxName: str | None = None
     sphere: Sphere | None = None
-    billingAccount: BillingAccount | EasyVereinReference | None = None
+    billingAccount: EasyVereinReference | BillingAccount | None = None
     costCentre: Annotated[str, Field(max_length=8)] | None = None
+    articleObject: EasyVereinReference | None = None
+    deductedExistingBalance: bool | None = None
 
 
-class InvoiceItem(InvoiceItemBase, EmptyStringsToNone):
+class InvoiceItem(InvoiceItemBase, EmptyStringsToNone, TimestampsMixin):
     """
     Pydantic model representing an InvoiceItem
     """
 
-    pass
+    __v3_names__ = {"organizationelement_ptr": None}
+
+    copiedFromParent: Any | None = Field(default=None, alias="_copiedFromParent")
+    electronic_total_price_with_tax: float | None = None
+    organizationelement_ptr: int | None = None
 
 
 class InvoiceItemCreate(

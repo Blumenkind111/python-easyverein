@@ -22,7 +22,11 @@ class TestMemberCustomField:
             MemberCustomFieldCreate(customField=example_custom_field.id, value="Example-Value")
         )
         assert isinstance(member_custom_field, MemberCustomField)
+        assert isinstance(member_custom_field.id, int)
         assert member_custom_field.value == "Example-Value"
+        fetched = ev_connection.member.custom_field(example_member.id).get_by_id(member_custom_field.id)
+        assert fetched.created_at is not None
+        assert fetched.updated_at is not None
 
         # Delete it again
         ev_connection.member.custom_field(example_member.id).delete(member_custom_field)

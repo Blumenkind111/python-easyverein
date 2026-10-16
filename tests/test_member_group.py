@@ -5,9 +5,20 @@ from easyverein.models.member_group import MemberGroup, MemberGroupCreate, Membe
 
 
 class TestMembeGropr:
-    def test_create_member_group_minimal(self, ev_connection: EasyvereinAPI):
+    def test_create_member_group_with_added_fields(self, ev_connection: EasyvereinAPI):
+        added_fields = {
+            "user_allowICSExport": "a",
+            "user_bankData": "d",
+            "auto_group_start_date_mode": 1,
+            "keepMembershipAfterAgeBasedGroupChange": True,
+            "isMatrixSearchable": True,
+            "matrixCommunicationPermission": 2,
+            "use_automated_matrix_chat": True,
+            "orderSequence": 3,
+            "participationsPerWeek": 2,
+        }
         member_group = ev_connection.member_group.create(
-            MemberGroupCreate(name="Test-Group", color="#FF0000", short="TG")
+            MemberGroupCreate(name="Test-Group", color="#FF0000", short="TG", **added_fields)
         )
         assert isinstance(member_group, MemberGroup)
         assert member_group.name == "Test-Group"
@@ -19,6 +30,13 @@ class TestMembeGropr:
         assert member_group.usePaymentFormula is False
         assert member_group.user_members_groupaccess == "n"
         assert member_group.id
+        fetched = ev_connection.member_group.get_by_id(member_group.id)
+        assert {name: getattr(fetched, name) for name in added_fields} == added_fields
+        assert "matrix_moderator_ids" in fetched.model_fields_set
+        assert "active_linked_items" in fetched.model_fields_set
+        assert "linkedItems" in fetched.model_fields_set
+        assert fetched.created_at is not None
+        assert fetched.updated_at is not None
 
         # Change the color
         mg = ev_connection.member_group.update(member_group.id, MemberGroupUpdate(color="#00FF00"))

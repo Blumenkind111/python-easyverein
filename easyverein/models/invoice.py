@@ -8,6 +8,8 @@ from typing import Literal
 
 from pydantic import Field
 
+from easyverein.models.mixins.base import EasyVereinBase, EasyVereinFilter
+
 from ..core.types import (
     Date,
     DateTime,
@@ -16,10 +18,10 @@ from ..core.types import (
     FilterStrList,
     PositiveIntWithZero,
 )
-from .base import EasyVereinBase, EasyVereinFilter
 from .mixins.empty_strings_mixin import EmptyStringsToNone
 from .mixins.required_attributes import required_mixin
 from .mixins.versioned import VersionedModel
+from .mixins.wastebasket import WastebasketMixin
 
 InvoiceKind = Literal[
     "balance", "donation", "membership", "revenue", "expense", "cancel", "credit", "selfIssuedReceipt"
@@ -39,7 +41,7 @@ class InvoiceCharges(VersionedModel):
     """Invoice amount including any charges and chargeback fees."""
 
 
-class InvoiceBase(EasyVereinBase):
+class InvoiceBase(EasyVereinBase, WastebasketMixin):
     """
     | Representative Model Class | Update Model Class | Create Model Class |
     | --- | --- | --- |
@@ -92,7 +94,7 @@ class InvoiceBase(EasyVereinBase):
     offerStatus: str | None = None
     offerValidUntil: Date | None = None
     offerNumber: str | None = None
-    relatedOffer: EasyVereinReference | None = None
+    relatedOffer: EasyVereinReference | Invoice | None = None
     useAddressBalance: bool | None = None
     removeFileOnDelete: bool | None = None
 

@@ -8,6 +8,8 @@ from typing import Literal
 
 from pydantic import Field, PositiveInt
 
+from easyverein.models.mixins.base import EasyVereinBase, EasyVereinFilter
+
 from ..core.types import (
     AnyHttpURL,
     Date,
@@ -15,13 +17,14 @@ from ..core.types import (
     FilterIntList,
     FilterStrList,
 )
-from .base import EasyVereinBase, EasyVereinFilter
 from .mixins.empty_strings_mixin import EmptyStringsToNone
 from .mixins.required_attributes import required_mixin
+from .mixins.timestamps import TimestampsMixin
 from .mixins.versioned import VersionedModel
+from .mixins.wastebasket import WastebasketMixin
 
 
-class MemberBase(EasyVereinBase):
+class MemberBase(EasyVereinBase, WastebasketMixin):
     """
     | Representative Model Class | Update Model Class | Create Model Class |
     | --- | --- | --- |
@@ -55,7 +58,7 @@ class MemberBase(EasyVereinBase):
     declarationOfResignation: AnyHttpURL | str | None = None
     declarationOfConsent: AnyHttpURL | str | None = None
     membershipNumber: str | None = None
-    contactDetails: ContactDetails | EasyVereinReference | None = None
+    contactDetails: EasyVereinReference | ContactDetails | None = None
     paymentStartDate: Date | None = Field(default=None, alias="_paymentStartDate")
     """
     Alias for `_paymentStartDate` field. See [Pydantic Models](../usage.md#pydantic-models) for details.
@@ -77,7 +80,7 @@ class MemberBase(EasyVereinBase):
     Alias for `_applicationWasAcceptedAt` field. See [Pydantic Models](../usage.md#pydantic-models) for details.
     """
     signatureText: str | None = None
-    relatedMembers: list[Member | EasyVereinReference] | None = None
+    relatedMembers: list[EasyVereinReference] | list[Member] | None = None
     editableByRelatedMembers: bool | None = Field(default=None, alias="_editableByRelatedMembers")
     """
     Alias for `_editableByRelatedMembers` field. See [Pydantic Models](../usage.md#pydantic-models) for details.
@@ -89,14 +92,30 @@ class MemberBase(EasyVereinBase):
     integrationDosbGender: Literal["m", "w", "d"] | None = None
     customFields: list[EasyVereinReference] | list[MemberCustomField] | None = None
     memberGroups: list[EasyVereinReference] | list[MemberMemberGroup] | None = None
+    applicationForm: EasyVereinReference | None = None
+    blockReason: str | None = None
+    blockedFromMatrix: bool | None = None
+    isMatrixSearchable: bool | None = Field(default=None, alias="_isMatrixSearchable")
+    matrixCommunicationPermission: int | None = Field(default=None, alias="_matrixCommunicationPermission")
+    matrixBlockReason: str | None = None
+    requirePasswordChange: bool | None = None
+    showWarningsAndNotesToAdminsInProfile: bool | None = None
+    useMatrixGroupSettings: bool | None = None
 
 
-class Member(MemberBase, EmptyStringsToNone):
+class Member(MemberBase, EmptyStringsToNone, TimestampsMixin):
     """
     Pydantic model for members
     """
 
-    pass
+    __v3_names__ = {"applicationKind": None}
+
+    isBlocked: bool | None = Field(default=None, alias="_isBlocked")
+    relatedMember: EasyVereinReference | Member | None = Field(default=None, alias="_relatedMember")
+    applicationKind: str | None = None
+    cancelReason: str | None = None
+    emailOrUserName: str | None = None
+    wantsToCancelAt: Date | None = None
 
 
 class MemberUpdate(MemberBase):
@@ -109,6 +128,10 @@ class MemberUpdate(MemberBase):
     chairmanPermissionGroup: str | None = Field(default=None, serialization_alias="_chairmanPermissionGroup")
     isApplication: bool | None = Field(default=None, serialization_alias="_isApplication")
     paymentStartDate: Date | None = Field(default=None, serialization_alias="_paymentStartDate")
+    isMatrixSearchable: bool | None = Field(default=None, serialization_alias="_isMatrixSearchable")
+    matrixCommunicationPermission: int | None = Field(
+        default=None, serialization_alias="_matrixCommunicationPermission"
+    )
 
 
 class MemberCreate(MemberUpdate, required_mixin(["contactDetails"])):  # type: ignore
