@@ -18,8 +18,7 @@ class BookingBase(EasyVereinBase):
     """
 
     amount: float | None = None
-    # TODO: Add reference to BankAccount once implemented
-    bankAccount: EasyVereinReference | None = None
+    bankAccount: EasyVereinReference | BankAccount | None = None
     billingAccount: BillingAccount | EasyVereinReference | None = None
     description: str | None = None
     date: DateTime | None = None
@@ -104,6 +103,7 @@ class BookingFilter(EasyVereinFilter):
     search: str | None = None
 
 
+from .bank_account import BankAccount  # noqa: E402
 from .billing_account import BillingAccount  # noqa: E402
 from .booking_project import BookingProject  # noqa: E402
 from .invoice import Invoice  # noqa: E402

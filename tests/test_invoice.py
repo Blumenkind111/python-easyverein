@@ -4,7 +4,7 @@ from typing import Generator
 import pytest
 from _pytest.fixtures import FixtureRequest
 from easyverein import EasyvereinAPI
-from easyverein.models.invoice import Invoice, InvoiceCreate, InvoiceUpdate
+from easyverein.models.invoice import Invoice, InvoiceCharges, InvoiceCreate, InvoiceUpdate
 from easyverein.models.invoice_item import InvoiceItem, InvoiceItemCreate, InvoiceItemFilter
 from easyverein.models.member import Member
 from pydantic_core import Url
@@ -33,6 +33,34 @@ class TestInvoices:
         # Check if all the invoices are of type Invoice
         for invoice in invoices:
             assert isinstance(invoice, Invoice)
+
+    def test_create_and_get_v3_invoice_charges(self, ev_connection: EasyvereinAPI, random_string: str):
+        # if ev_connection.c.api_version != "v3.0":
+        #     pytest.skip("Invoice charges test targets API v3.0")
+
+        invoice_model = InvoiceCreate(
+            invNumber=random_string,
+            receiver="Test Receiver",
+            totalPrice=42.75,
+            isDraft=True,
+        )
+        invoice = ev_connection.invoice.create(invoice_model)
+
+        try:
+            assert isinstance(invoice, Invoice)
+            assert invoice.id is not None
+
+            fetched_invoice = ev_connection.invoice.get_by_id(invoice.id, query="{id,invNumber,totalPrice,charges}")
+
+            assert fetched_invoice.id == invoice.id
+            assert fetched_invoice.invNumber == invoice_model.invNumber
+            assert fetched_invoice.totalPrice == pytest.approx(invoice_model.totalPrice)
+            assert isinstance(fetched_invoice.charges, InvoiceCharges)
+            assert fetched_invoice.charges.charge == pytest.approx(0)
+            assert fetched_invoice.charges.chargeBack == pytest.approx(0)
+            assert fetched_invoice.charges.total == pytest.approx(invoice_model.totalPrice)
+        finally:
+            ev_connection.invoice.delete(invoice, delete_from_recycle_bin=True)
 
     def test_get_attachment(self, ev_connection: EasyvereinAPI):
         invoices, _ = ev_connection.invoice.get()

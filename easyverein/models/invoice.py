@@ -10,6 +10,7 @@ from pydantic import Field
 
 from ..core.types import (
     Date,
+    DateTime,
     EasyVereinReference,
     FilterIntList,
     FilterStrList,
@@ -18,10 +19,24 @@ from ..core.types import (
 from .base import EasyVereinBase, EasyVereinFilter
 from .mixins.empty_strings_mixin import EmptyStringsToNone
 from .mixins.required_attributes import required_mixin
+from .mixins.versioned import VersionedModel
 
 InvoiceKind = Literal[
     "balance", "donation", "membership", "revenue", "expense", "cancel", "credit", "selfIssuedReceipt"
 ]
+
+
+class InvoiceCharges(VersionedModel):
+    """API-calculated invoice amount and additional fees."""
+
+    __v3_names__ = {"chargeBack": "chargeBack"}
+
+    charge: float | None = None
+    """Additional invoice charges, such as reminder fees."""
+    chargeBack: float | None = None
+    """Fees from a reversed payment, separate from ordinary charges."""
+    total: float | None = None
+    """Invoice amount including any charges and chargeback fees."""
 
 
 class InvoiceBase(EasyVereinBase):
@@ -67,6 +82,19 @@ class InvoiceBase(EasyVereinBase):
     # TODO: Add reference to Booking once implemented
     relatedBookings: list[EasyVereinReference] | list[Booking] | None = None
     invoiceItems: list[EasyVereinReference] | list[InvoiceItem] | None = None
+    bankAccount: EasyVereinReference | BankAccount | None = None
+    creationDateForRecurringInvoices: Date | None = None
+    recurringInvoicesInterval: int | None = None
+    customPaymentMethod: str | None = None
+    isTaxRatePerInvoiceItem: bool | None = None
+    isSubjectToTax: bool | None = None
+    mode: str | None = None
+    offerStatus: str | None = None
+    offerValidUntil: Date | None = None
+    offerNumber: str | None = None
+    relatedOffer: EasyVereinReference | None = None
+    useAddressBalance: bool | None = None
+    removeFileOnDelete: bool | None = None
 
 
 class Invoice(InvoiceBase, EmptyStringsToNone):
@@ -74,7 +102,9 @@ class Invoice(InvoiceBase, EmptyStringsToNone):
     Pydantic model representing an Invoice
     """
 
-    pass
+    charges: InvoiceCharges | None = None
+    createdAt: DateTime | None = None
+    updatedAt: DateTime | None = None
 
 
 class InvoiceCreate(
@@ -148,6 +178,7 @@ class InvoiceFilter(EasyVereinFilter):
     search: str | None = None
 
 
+from .bank_account import BankAccount  # noqa: E402
 from .billing_account import BillingAccount  # noqa: E402
 from .booking import Booking  # noqa: E402
 from .contact_details import ContactDetails  # noqa: E402

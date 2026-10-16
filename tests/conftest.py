@@ -4,16 +4,38 @@ import string
 
 import pytest
 from easyverein import EasyvereinAPI
+from easyverein.core.api_version import SUPPORTED_API_VERSIONS
 from easyverein.models import CustomFieldCreate
 
 
-@pytest.fixture(scope="session")
-def ev_connection():
-    api_url = os.getenv("EV_API_URL", "https://easyverein.com/api/")
-    api_version = os.getenv("EV_API_VERSION", "v2.0")
-    api_key = os.getenv("EV_API_KEY", "")
+def pytest_addoption(parser: pytest.Parser):
+    parser.addoption(
+        "--api-version",
+        choices=("both", *SUPPORTED_API_VERSIONS),
+        help="API version for integration tests (default: EV_API_VERSION or both)",
+    )
 
-    return EasyvereinAPI(api_key, base_url=api_url, api_version=api_version, auto_retry=True)
+
+def pytest_generate_tests(metafunc: pytest.Metafunc):
+    if "ev_connection" not in metafunc.fixturenames:
+        return
+
+    selected = metafunc.config.getoption("--api-version") or os.getenv("EV_API_VERSION", "both")
+    if selected not in ("both", *SUPPORTED_API_VERSIONS):
+        raise pytest.UsageError(f"Invalid EV_API_VERSION: {selected!r}; use 'both', 'v2.0', or 'v3.0'")
+
+    versions = SUPPORTED_API_VERSIONS if selected == "both" else (selected,)
+    metafunc.parametrize("ev_connection", versions, indirect=True, scope="session", ids=versions)
+
+
+@pytest.fixture(scope="session")
+def ev_connection(request: pytest.FixtureRequest):
+    api_url = os.getenv("EV_API_URL", "https://easyverein.com/api/")
+    api_key = os.getenv("EV_API_KEY")
+    if not api_key:
+        pytest.fail("EV_API_KEY must be set for integration tests")
+
+    return EasyvereinAPI(api_key, base_url=api_url, api_version=request.param, auto_retry=True)
 
 
 @pytest.fixture(scope="module", autouse=True)
