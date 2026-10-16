@@ -1,4 +1,5 @@
 # noqa: F401
+from .bank_account import BankAccount, BankAccountCreate, BankAccountFilter, BankAccountUpdate
 from .billing_account import BillingAccount, BillingAccountCreate, BillingAccountFilter, BillingAccountUpdate
 from .booking import Booking, BookingCreate, BookingFilter, BookingUpdate
 from .booking_project import (
@@ -31,7 +32,7 @@ from .custom_field_select_option import (
     CustomFieldSelectOptionFilter,
     CustomFieldSelectOptionUpdate,
 )
-from .invoice import Invoice, InvoiceCreate, InvoiceFilter, InvoiceUpdate
+from .invoice import Invoice, InvoiceCharges, InvoiceCreate, InvoiceFilter, InvoiceUpdate
 from .invoice_item import (
     InvoiceItem,
     InvoiceItemCreate,
@@ -54,6 +55,7 @@ from .member_member_group import (
     MemberMemberGroupUpdate,
 )
 
+BankAccount.model_rebuild()
 BillingAccount.model_rebuild()
 Booking.model_rebuild()
 BookingProject.model_rebuild()

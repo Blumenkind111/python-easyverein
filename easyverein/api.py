@@ -8,6 +8,7 @@ from typing import Callable, cast
 from .core.api_version import DEFAULT_API_VERSION, REMOVED_API_VERSIONS, SUPPORTED_API_VERSIONS
 from .core.client import EasyvereinClient
 from .core.responses import BearerToken
+from .modules.bank_account import BankAccountMixin
 from .modules.billing_account import BillingAccountMixin
 from .modules.booking import BookingMixin
 from .modules.booking_project import BookingProjectMixin
@@ -71,6 +72,7 @@ class EasyvereinAPI:
         self.c = EasyvereinClient(api_key, api_version, base_url, self.logger, self, auto_retry)
 
         # Add methods
+        self.bank_account = BankAccountMixin(self.c, self.logger)
         self.booking = BookingMixin(self.c, self.logger)
         self.booking_project = BookingProjectMixin(self.c, self.logger)
         self.billing_account = BillingAccountMixin(self.c, self.logger)

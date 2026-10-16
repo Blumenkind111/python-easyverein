@@ -47,6 +47,7 @@ nav:
     - "CRUD Operations": api/crud.md
     - "Recycle Bin / Soft Delete": api/recycle_bin.md
     - "Endpoint Specific":
+        - "Bank Account": api/endpoints/bank_account.md
         - "Booking": api/endpoints/booking.md
         - "Booking Project": api/endpoints/booking_project.md
         - "Billing Account": api/endpoints/billing_account.md
@@ -64,6 +65,7 @@ nav:
         - "Member Group": api/endpoints/member_group.md
   - "Model Reference":
     - "Base Model": models/base.md
+    - "Bank Account": models/bank_account.md
     - "Booking": models/booking.md
     - "Booking Project": models/booking_project.md
     - "Billing Account": models/billing_account.md
