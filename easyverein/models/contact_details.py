@@ -146,7 +146,7 @@ class ContactDetails(ContactDetailsBase, EmptyStringsToNone, TimestampsMixin):
     member: EasyVereinReference | Member | None = None
     addressStringInvoice: str | None = None
     age: int | None = None
-    changeRequests: list[EasyVereinReference] | None = None
+    changeRequests: EasyVereinReference | list[EasyVereinReference] | None = None
     copiedInstances: list[EasyVereinReference] | list[ContactDetails] | None = None
     customFields: list[EasyVereinReference] | None = None
     formerMemberData: EasyVereinReference | None = None
